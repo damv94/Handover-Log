@@ -55,7 +55,7 @@ a{color:inherit}
 
 /* Top bar */
 .top{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
-.top-inner{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top-inner{max-width:1400px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .brand{display:flex;flex-direction:column;min-width:0}
 .brand h1{font-size:19px}
 .brand .ship{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none}
@@ -73,6 +73,7 @@ a{color:inherit}
 .gate-card .btn.primary{width:100%;justify-content:center;min-height:44px}
 .gate-logo{width:52px;height:52px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-family:var(--font-display);font-size:20px}
 .gate-err{color:var(--bad);font-size:14px;min-height:20px;margin-bottom:8px}
+.gate-steps{margin:0 0 14px;padding-left:22px;line-height:1.55}.gate-steps li{margin-bottom:6px}
 #licBox:empty{display:none}
 .lic-line{margin:10px 6px 4px;padding-top:10px;border-top:1px solid var(--line);line-height:1.6}
 .lic-warn{color:var(--warn);font-weight:700}
@@ -138,7 +139,9 @@ input[type=radio],input[type=checkbox],select,input[type=date],label.check,.chip
 input:disabled,select:disabled,label.check:has(input:disabled){cursor:not-allowed}
 
 /* Shell */
-.shell{max-width:1200px;margin:0 auto;padding:16px 16px 90px;display:grid;grid-template-columns:310px minmax(0,1fr);gap:18px;align-items:start}
+.shell{max-width:1400px;margin:0 auto;padding:16px 16px 90px;display:grid;grid-template-columns:310px minmax(0,1fr);gap:18px;align-items:start}
+/* Laptops and bigger screens: a wider menu so section names stay on one line */
+@media (min-width:1100px){.shell{grid-template-columns:clamp(360px,29vw,420px) minmax(0,1fr);gap:22px}}
 .side{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px}
 .content{display:flex;flex-direction:column;gap:16px;min-width:0}
 @media (max-width:860px){
@@ -192,6 +195,9 @@ input:disabled,select:disabled,label.check:has(input:disabled){cursor:not-allowe
   .sec-head .numbig{grid-column:1;grid-row:2}
   .sec-head > div:not(.right){grid-column:2/4;grid-row:2}
   .sec-head:not(:has(.numbig)) > div:not(.right){grid-column:1/-1}
+  /* several buttons (e.g. Form preview): put them on their own row under the title so they don't cover "‹ Menu" */
+  .sec-head .right:has(> :nth-child(2)){grid-column:1/-1;grid-row:3;flex-wrap:wrap;align-self:stretch}
+  .sec-head .right:has(> :nth-child(2)) > .btn{flex:1 1 auto;justify-content:center}
 }
 .guide{background:var(--accent-soft);border-radius:8px;padding:12px 14px;font-size:16px;line-height:1.5;margin-top:12px}
 .guide-d{margin-top:12px}
@@ -702,7 +708,7 @@ const EXAMPLE = /*SEED*/null;
 /* OFFLINE is switched on by the build script for the installable phone app (data on the device, no server) */
 const OFFLINE = true;
 const PUBKEY = {"kty": "EC", "crv": "P-256", "x": "AoYyd8JDVB3zLSnou7J_Ip_wOw5Bm0MYbWLcGlC82x4", "y": "Ajk5474LPg0guMoJ4pRR-dgRPF3OGH5a9DTBLJLd2JA"};
-const APP_VERSION = "2026.11.20-1519";
+const APP_VERSION = "2026.11.20-1615";
 
 /* ================= State and storage ================= */
 const S = {meta:{}, handover:{}, standing:{}, logo:{}, template:{}, equipment:{}, entries:{}, archive:{}};
@@ -1025,7 +1031,7 @@ function officialHTML(md){
       return `<div class="ih">${esc(b.text)}${b.open ? ' <span class="opn">[NOT SOLVED]</span>' : ""}</div>${b.details ? P(b.details) : ""}`;
     }).join("") || "<p>&nbsp;</p>";
   };
-  return `<div class="paper" style="padding-top:28px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;height:68px;padding-bottom:6px">${md.logo ? `<img src="${md.logo.data}" alt="" style="height:60px;width:auto;max-width:240px">` : (locked() ? "<span></span>" : `<label for="logoFileGlobal" style="border:1.5px dashed #9aa5b1;border-radius:6px;padding:10px 14px;font-size:12px;color:#5a6774;cursor:pointer;font-family:var(--font-body)">+ Add company logo</label>`)}<span style="font-size:12px;font-style:italic">${esc(md.rev || "")}</span></div><table>
+  return `<div class="paper" style="padding-top:28px"><div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;min-height:20px;padding-bottom:1px">${md.logo ? `<img src="${md.logo.data}" alt="" style="height:40px;width:auto;max-width:170px;opacity:.5;filter:saturate(.75);margin-bottom:12px">` : (locked() ? "<span></span>" : `<label for="logoFileGlobal" style="border:1.5px dashed #9aa5b1;border-radius:6px;padding:10px 14px;font-size:12px;color:#5a6774;cursor:pointer;font-family:var(--font-body)">+ Add company logo</label>`)}<span style="font-size:12px;font-style:italic;color:#8c8c8c;line-height:1;white-space:nowrap">${esc(md.rev || "")}</span></div><table>
     <colgroup><col style="width:38%"><col style="width:29%"><col style="width:33%"></colgroup>
     <tr><td colspan="3" class="b" style="font-size:13px;text-align:center">${esc(md.title)}- ${esc(md.code)}</td></tr>
     <tr><td class="b">SHIP: ${esc(md.ship.toUpperCase())}</td><td class="b">DATE: ${esc(fmtDate(md.date).toUpperCase())}</td><td class="b">IN PORT: ${esc(md.port.toUpperCase())}</td></tr>
@@ -1103,7 +1109,7 @@ function viewDetails(){
       <div style="margin-top:12px"><span class="lbl" style="display:block">Company logo</span>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           ${S.logo && S.logo.data ? `<img src="${S.logo.data}" alt="Company logo" style="max-height:48px;max-width:180px;border:1px solid var(--line);border-radius:6px;padding:4px;background:#fff">` : `<span class="small muted">No logo. The form header will show the revision only.</span>`}
-          ${lk ? "" : `<label class="btn sm" for="logoFileGlobal">${S.logo && S.logo.data ? "Change logo" : "Upload logo"}</label>${S.logo && S.logo.data ? `<button type="button" class="btn sm danger" id="btnLogoDel">Remove</button>` : ""}`}
+          ${lk ? "" : `<label class="btn sm" for="logoFileGlobal">${S.logo && S.logo.data ? "Change logo" : "Upload logo"}</label>${S.logo && S.logo.data ? `<button type="button" class="btn sm" id="btnLogoDl">Download logo</button><button type="button" class="btn sm danger" id="btnLogoDel">Remove</button>` : ""}`}
         </div>
         <div class="small muted" style="margin-top:4px">Printed at the top left of the form header in the preview, Word and PDF files. Use your company's own logo file.</div></div>
       <div style="margin-top:14px"><span class="lbl" style="display:block">Company form</span>
@@ -1631,13 +1637,21 @@ async function modelToDocx(md){
   if(md.chiefSigned) rows.push(new TableRow({children:[cell([P(`Reviewed by Chief Engineer ${md.chief} – ${fmtStamp(md.chiefSigned)}`, {bold:true})], {span:2})]}));
   const body = new Table({width:{size:W, type:WidthType.DXA}, columnWidths:[NUMW, W-NUMW], rows});
   const hdrKids = [];
-  if(md.logo){ try{ const bin = atob(md.logo.data.split(",")[1]); const u8 = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
-    const sc = Math.min(230 / md.logo.w, 62 / md.logo.h); hdrKids.push(new Paragraph({children:[new ImageRun({data:u8, transformation:{width:Math.round(md.logo.w*sc), height:Math.round(md.logo.h*sc)}})]})); }catch(e){} }
-  hdrKids.push(new Paragraph({alignment:AlignmentType.RIGHT, children:[new TextRun({text: md.rev || "", size:18, italics:true})]}));
-  const footer = new Footer({children:[new Paragraph({alignment:AlignmentType.RIGHT, children:[new TextRun({children:[PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES], size:18})]})]});
-  return Packer.toBlob(new Document({styles:{default:{document:{run:{font:"Times New Roman", size:20}}}}, sections:[{properties:{page:{size:{width:12240, height:15840}, margin:{top:1440, bottom:1440, left:1800, right:1800, header:480, footer:720}}},
+  const lg = await fadeLogo(md.logo);
+  if(lg){ try{ const bin = atob(lg.data.split(",")[1]); const u8 = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+    const sc = Math.min(165 / lg.w, 40 / lg.h); hdrKids.push(new Paragraph({children:[new ImageRun({data:u8, transformation:{width:Math.round(lg.w*sc), height:Math.round(lg.h*sc)}})]})); }catch(e){} }
+  hdrKids.push(new Paragraph({alignment:AlignmentType.RIGHT, spacing:{before:lg ? 120 : 0, after:0}, children:[new TextRun({text: md.rev || "", size:18, italics:true, color:"7F7F7F"})]}));
+  const footer = new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER, children:[new TextRun({children:[PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES], size:18, color:"7F7F7F"})]})]});
+  return Packer.toBlob(new Document({styles:{default:{document:{run:{font:"Times New Roman", size:20}}}}, sections:[{properties:{page:{size:{width:12240, height:15840}, margin:{top:600, bottom:1440, left:1800, right:1800, header:480, footer:720}}},
     headers:{default:new Header({children:hdrKids})}, footers:{default:footer}, children:[head, new Paragraph({text:""}), body]}]}));
 }
+/* The logo sits in the page header like a watermark: smaller and washed out, as on the company's own form */
+const _fadeCache = {};
+function fadeLogo(logo){ if(!logo) return Promise.resolve(null); if(_fadeCache[logo.data]) return Promise.resolve(_fadeCache[logo.data]);
+  return new Promise(res => { const img = new Image(); img.onload = () => { const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext("2d");
+      g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.globalAlpha = 0.5; g.filter = "saturate(75%)"; g.drawImage(img, 0, 0);
+      const out = {data: c.toDataURL("image/png"), w: c.width, h: c.height}; _fadeCache[logo.data] = out; res(out); };
+    img.onerror = () => res(logo); img.src = logo.data; }); }
 /* Heavy libraries load only when needed (and are fetched quietly in the background on the pages that use them) */
 const _scripts = {};
 function loadScript(src){ if(_scripts[src]) return _scripts[src];
@@ -1658,6 +1672,7 @@ async function ensurePdfMake(){
   return window.pdfMake;
 }
 async function modelToPdf(md){
+  const lgPdf = await fadeLogo(md.logo);
   const pdfMake = await ensurePdfMake();
   const lines = t => String(t ?? "").split("\n").map(l => ({text: l || " ", margin:[0,0,0,2]}));
   const content = sec => {
@@ -1688,9 +1703,9 @@ async function modelToPdf(md){
     rows.push([{stack: content(sec), colSpan:2}, {}]);
   });
   if(md.chiefSigned) rows.push([{text:`Reviewed by Chief Engineer ${md.chief} – ${fmtStamp(md.chiefSigned)}`, bold:true, colSpan:2}, {}]);
-  const dd = {pageSize:"LETTER", pageMargins:[90, 72, 90, 72], defaultStyle:{font:"Tinos", fontSize:10, lineHeight:1.1},
-    header: () => ({margin:[90, 16, 90, 0], columns:[ md.logo ? {image: md.logo.data, fit:[170, 48]} : {text:""}, {text: md.rev || "", alignment:"right", fontSize:9, italics:true, margin:[0, md.logo ? 38 : 22, 0, 0]} ]}),
-    footer: (cur, total) => ({text:`${cur} of ${total}`, alignment:"right", fontSize:9, margin:[90, 30, 90, 0]}),
+  const dd = {pageSize:"LETTER", pageMargins:[90, 66, 90, 72], defaultStyle:{font:"Tinos", fontSize:10, lineHeight:1.1},
+    header: () => ({margin:[90, 20, 90, 0], stack:[ lgPdf ? {image: lgPdf.data, fit:[125, 30], margin:[0,0,0,4]} : {text:" ", fontSize:20, margin:[0,0,0,4]}, {text: md.rev || " ", alignment:"right", fontSize:9, italics:true, color:"#7f7f7f", lineHeight:1} ]}),
+    footer: (cur, total) => ({text:`${cur} of ${total}`, alignment:"center", fontSize:9, color:"#7f7f7f", margin:[90, 30, 90, 0]}),
     content:[head, {text:" ", margin:[0,4]}, {table:{widths:[34,"*"], body:rows, dontBreakRows:false}, layout: grey}]};
   return new Promise((res, rej) => { try{ pdfMake.createPdf(dd).getBlob(res); }catch(e){ rej(e); } });
 }
@@ -1826,7 +1841,7 @@ async function archiveAndNext(next){
    reopening it shows the Finish button again and finishing completes the clean-up. */
 function finishAndClear(){
   const m = S.meta; const meta = {outgoing: m.outgoing || "", rank: m.rank || ""};
-  if(m.formCode) meta.formCode = m.formCode; if(m.formRev) meta.formRev = m.formRev;
+  if(m.formCode) meta.formCode = m.formCode; if(m.formRev) meta.formRev = m.formRev; if(m.logoV) meta.logoV = m.logoV;
   const paths = [...Object.keys(S.entries).map(id => "entries/" + id), ...Object.keys(S.equipment).map(id => "equipment/" + id)];
   S.entries = {}; S.equipment = {};
   const jobs = paths.map(p => { if(!db){ if(idb) idbWrite(p, null); return Promise.resolve(); } pendingDel.add(p); return queueWrite(p, () => db.doc(p).delete()).finally(() => pendingDel.delete(p)); });
@@ -2024,6 +2039,8 @@ document.addEventListener("click", ev => {
   const pfe = t.closest("[data-pfedit]"); if(pfe){ openEditor(null, pfe.dataset.pfedit); return; }
   const pft = t.closest("[data-pfthread]"); if(pft){ const th = anomalyThreads().find(x => x.id === pft.dataset.pfthread); if(th) openEditor("anomaly", null, {prefill:{eqId: th.eqId, equipment: th.equipment, tag: th.tag, open: th.open}}); return; }
   const pfo = t.closest("[data-pfok]"); if(pfo){ patchDoc("handover", {pfOk: {...(S.handover.pfOk || {}), [pfo.dataset.pfok]: true}}, 0); render(true); return; }
+  if(t.id === "btnLogoDl"){ if(!downloads || !S.logo || !S.logo.data){ toast("Downloads aren't available here."); return; }
+    fetch(S.logo.data).then(r => r.blob()).then(b => downloads.save({filename:"company-logo.png", data:b})).then(() => toast("Logo saved")).catch(err => { if(!(err && err.code === "declined")) toast("Couldn't save the logo."); }); return; }
   if(t.id === "btnBackupNudge"){ downloadBackup(); return; }
   if(t.id === "licChange"){ showGate("new"); const g = $("gate"); if(g){ const c = document.createElement("button"); c.className = "btn"; c.type = "button"; c.textContent = "Cancel"; c.style.marginLeft = "8px"; c.onclick = () => g.remove(); $("gateGo").after(c); } return; }
   if(t.id === "btnEditAgain"){ const nh = {...S.handover, editOf: S.handover.savedAs}; delete nh.savedAs; saveAsk = false; putDoc("hb/handover", nh); toast("Form unlocked. Save again when you're done."); render(true); window.scrollTo(0, 0); return; }
@@ -2302,6 +2319,24 @@ let gateCode = null;
 (function(){ const h = location.hash || ""; const m = h.match(/^#activate=(.+)$/); if(m){ gateCode = decodeURIComponent(m[1]); history.replaceState(null, "", location.pathname + location.search + "#home"); } })();
 addEventListener("hashchange", () => { if(!OFFLINE) return; const m = (location.hash || "").match(/^#activate=(.+)$/); if(!m) return;
   gateCode = decodeURIComponent(m[1]); history.replaceState(null, "", location.pathname + location.search + "#home"); licenceStart(); });
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const IS_STANDALONE = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+async function pasteAndActivate(){ try{ const t = await navigator.clipboard.readText(); if(t){ $("gateIn").value = t.trim(); $("gateGo").click(); return; } }catch(e){}
+  $("gateErr").textContent = "Couldn't read the clipboard. Press and hold in the box, then tap Paste."; $("gateIn").focus(); }
+/* iPhone: an app on the Home Screen keeps its own storage, separate from Safari, so it asks for the code once more.
+   After activating in Safari, offer to copy the code and explain the last step. */
+function showInstallHelp(r){
+  let g = document.createElement("div"); g.id = "gate"; g.className = "gate"; document.body.appendChild(g);
+  g.innerHTML = `<div class="gate-card"><div class="gate-logo" aria-hidden="true">HL</div><h1>Activated for ${esc(r.n)}</h1>
+    <p><strong>Last step: put it on your Home Screen.</strong></p>
+    <ol class="gate-steps"><li>Tap <strong>Copy code</strong> below.</li><li>Tap the <strong>Share</strong> button in Safari (square with an arrow), then <strong>Add to Home Screen</strong>.</li><li>Open Handover Log from your Home Screen and tap <strong>Paste code</strong>. It only asks this once.</li></ol>
+    <button class="btn primary" type="button" id="gateCopy">Copy code</button>
+    <div class="gate-err" id="gateErr" role="status" style="color:var(--ok);margin-top:8px"></div>
+    <p class="small muted">Always open it from the Home Screen. Notes written here in Safari stay in Safari and don't move to the Home Screen app.</p>
+    <button class="linkbtn small" type="button" id="gateSkip">Continue in Safari instead</button></div>`;
+  $("gateCopy").onclick = async () => { try{ await navigator.clipboard.writeText(r.code); $("gateErr").textContent = "Code copied. Now Share → Add to Home Screen."; }catch(e){ $("gateErr").textContent = "Couldn't copy automatically."; } };
+  $("gateSkip").onclick = () => g.remove();
+}
 function showGate(kind, msg){
   let g = $("gate"); if(!g){ g = document.createElement("div"); g.id = "gate"; g.className = "gate"; document.body.appendChild(g); }
   const expired = kind === "expired";
@@ -2312,7 +2347,9 @@ function showGate(kind, msg){
     <label class="lbl" for="gateIn">Activation code</label><textarea id="gateIn" rows="3" placeholder="Paste the code or the link here" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
     <div class="gate-err" id="gateErr" role="alert">${esc(msg || "")}</div>
     <button class="btn primary" type="button" id="gateGo">Activate</button>
+    ${navigator.clipboard && navigator.clipboard.readText ? `<button class="btn" type="button" id="gatePaste" style="width:100%;justify-content:center;margin-top:8px;min-height:44px">Paste code</button>` : ""}
     <p class="small muted" style="margin-top:14px">Everything you write stays on this phone. Nothing is sent anywhere.</p></div>`;
+  const ps = $("gatePaste"); if(ps) ps.onclick = pasteAndActivate;
   $("gateGo").onclick = async () => { const v = $("gateIn").value; const r = await checkCode(v);
     if(!r){ $("gateErr").textContent = "That code isn't valid. Check you copied all of it."; return; }
     if(todayISO() > r.e && licToday() > r.e){ $("gateErr").textContent = `That code ended on ${fmtDate(r.e)}. Ask for a new one.`; return; }
@@ -2321,7 +2358,8 @@ function showGate(kind, msg){
 }
 function acceptLicence(r){ lic = r; try{ localStorage.setItem(LIC_KEY, r.code); }catch(e){} const g = $("gate"); if(g) g.remove();
   if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  toast(`Activated for ${r.n} until ${fmtDate(r.e)}`); render(true); }
+  toast(r.e >= "2090-01-01" ? `Activated for ${r.n}` : `Activated for ${r.n} until ${fmtDate(r.e)}`); render(true);
+  if(IS_IOS && !IS_STANDALONE) showInstallHelp(r); }
 async function licenceStart(){
   let stored = null; try{ stored = localStorage.getItem(LIC_KEY); }catch(e){}
   if(gateCode){ const r = await checkCode(gateCode); gateCode = null;
@@ -2352,6 +2390,12 @@ function registerSW(){
     t.querySelector(".toast-undo").onclick = () => { flushAll().then(() => location.reload()); }; clearTimeout(toast._t); });
 }
 
+/* One-time logo update: the Claude version picks up company-logo.png published next to the page */
+const LOGO_VERSION = 2; let _logoTried = false;
+function maybeImportLogo(){ if(_logoTried || (!db && !idb) || (S.meta.logoV || 0) >= LOGO_VERSION) return; _logoTried = true;
+  fetch("company-logo.png", {cache:"no-store"}).then(r => { if(!r.ok) throw 0; return r.blob(); }).then(b => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); }))
+    .then(url => { const img = new Image(); img.onload = () => { putDoc("hb/logo", {data:url, w:img.naturalWidth, h:img.naturalHeight}); patchDoc("meta", {logoV: LOGO_VERSION}, 0); if(!OFFLINE) toast("Company logo updated"); render(true); }; img.src = url; })
+    .catch(() => {}); }
 /* ================= Init ================= */
 async function initDevice(){
   mode = "device"; downloads = makeLocalDownloads();
@@ -2367,7 +2411,7 @@ async function initDevice(){
     let stored = null; try{ stored = JSON.parse(localStorage.getItem(LS_KEY) || "null"); }catch(e2){}
     if(stored) ["meta","handover","standing","logo","template","equipment","entries","archive"].forEach(k => { S[k] = stored[k] || {}; });
     toast("This browser can't keep data permanently here. Use Safari or Chrome, not a private window."); }
-  render(true); registerSW(); await licenceStart();
+  render(true); registerSW(); maybeImportLogo(); await licenceStart();
 }
 async function init(){
   if(OFFLINE){ routeFromHash(); return initDevice(); }
@@ -2378,10 +2422,10 @@ async function init(){
   if(db){
     mode = "db";
     COLS.forEach(col => db.collection(col).onSnapshot(snap => { const o = {}; snap.docs.forEach(d => { if(!pendingDel.has(col + "/" + d.id)) o[d.id] = d.data(); }); S[col] = o;
-      if(!snap.metadata.fromCache) loaded.add(col); if(loaded.size >= NEED_LOADED) clearTimeout(timer); scheduleRender(); },
+      if(!snap.metadata.fromCache) loaded.add(col); if(loaded.size >= NEED_LOADED){ clearTimeout(timer); maybeImportLogo(); } scheduleRender(); },
       () => { loaded.add(col); toast("Lost connection to saved data. Reopen the page later."); render(); }));
     Object.entries(DOCS).forEach(([path,key]) => db.doc(path).onSnapshot(snap => { if(!dirty[path]) S[key] = snap.exists ? {...snap.data()} : {};
-      if(!snap.metadata.fromCache) loaded.add(path); if(loaded.size >= NEED_LOADED) clearTimeout(timer); scheduleRender(); }, () => { loaded.add(path); scheduleRender(); }));
+      if(!snap.metadata.fromCache) loaded.add(path); if(loaded.size >= NEED_LOADED){ clearTimeout(timer); maybeImportLogo(); } scheduleRender(); }, () => { loaded.add(path); scheduleRender(); }));
   } else {
     mode = "local"; clearTimeout(timer);
     let stored = null; try{ stored = JSON.parse(localStorage.getItem(LS_KEY) || "null"); }catch(e){}
