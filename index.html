@@ -10,10 +10,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Handover Log">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
 
-<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="fonts.css">
 <style>
 /* Layout idea: an alarm-panel style menu that mirrors the company form (left), the selected section on the right. Status = colour + symbol + word. */
 :root{
@@ -702,7 +702,7 @@ const EXAMPLE = /*SEED*/null;
 /* OFFLINE is switched on by the build script for the installable phone app (data on the device, no server) */
 const OFFLINE = true;
 const PUBKEY = {"kty": "EC", "crv": "P-256", "x": "AoYyd8JDVB3zLSnou7J_Ip_wOw5Bm0MYbWLcGlC82x4", "y": "Ajk5474LPg0guMoJ4pRR-dgRPF3OGH5a9DTBLJLd2JA"};
-const APP_VERSION = "2026.11.20-1457";
+const APP_VERSION = "2026.11.20-1519";
 
 /* ================= State and storage ================= */
 const S = {meta:{}, handover:{}, standing:{}, logo:{}, template:{}, equipment:{}, entries:{}, archive:{}};
@@ -1642,8 +1642,8 @@ async function modelToDocx(md){
 const _scripts = {};
 function loadScript(src){ if(_scripts[src]) return _scripts[src];
   return _scripts[src] = new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = () => { delete _scripts[src]; el.remove(); rej(new Error("nolib")); }; document.head.appendChild(el); }); }
-const DOCX_URL = OFFLINE ? "lib/docx.iife.js" : "https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.iife.js";
-const PDFMAKE_URL = OFFLINE ? "lib/pdfmake.min.js" : "https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/pdfmake.min.js";
+const DOCX_URL = OFFLINE ? "docx.iife.js" : "https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.iife.js";
+const PDFMAKE_URL = OFFLINE ? "pdfmake.min.js" : "https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/pdfmake.min.js";
 async function ensureDocx(){ if(window.docx) return window.docx; await loadScript(DOCX_URL); if(!window.docx) throw new Error("nolib"); return window.docx; }
 let _prefetched = false;
 function prefetchLibs(){ if(_prefetched) return; _prefetched = true;
