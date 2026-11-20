@@ -708,7 +708,7 @@ const EXAMPLE = /*SEED*/null;
 /* OFFLINE is switched on by the build script for the installable phone app (data on the device, no server) */
 const OFFLINE = true;
 const PUBKEY = {"kty": "EC", "crv": "P-256", "x": "AoYyd8JDVB3zLSnou7J_Ip_wOw5Bm0MYbWLcGlC82x4", "y": "Ajk5474LPg0guMoJ4pRR-dgRPF3OGH5a9DTBLJLd2JA"};
-const APP_VERSION = "2026.11.20-1615";
+const APP_VERSION = "2026.11.20-1650";
 
 /* ================= State and storage ================= */
 const S = {meta:{}, handover:{}, standing:{}, logo:{}, template:{}, equipment:{}, entries:{}, archive:{}};
@@ -764,7 +764,7 @@ function idbFlush(){ clearTimeout(idbTimer); idbTimer = 0; if(!idb || !idbQueue.
     batch.forEach(([p, d]) => { if(d == null) st.delete(p); else st.put(d, p); });
     tx.oncomplete = () => { pending--; renderSaveState(); res(); };
     tx.onerror = tx.onabort = () => { pending--; batch.forEach(([p, d]) => { if(!idbQueue.has(p)) idbQueue.set(p, d); }); renderSaveState();
-      toast(tx.error && tx.error.name === "QuotaExceededError" ? "This phone's storage is full. Free some space, then make a backup." : "Couldn't save on this device. Try again, and make a backup."); res(); }; }); }
+      toast(tx.error && tx.error.name === "QuotaExceededError" ? "This device's storage is full. Free some space, then make a backup." : "Couldn't save on this device. Try again, and make a backup."); res(); }; }); }
 function flushAll(){ Object.keys(timers).forEach(path => { if(dirty[path]){ clearTimeout(timers[path]); dirty[path] = false; putDoc(path, {...S[DOCS[path]]}); } }); return idbFlush(); }
 addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden" && idb) flushAll(); });
 addEventListener("pagehide", () => { if(idb) flushAll(); });
@@ -908,7 +908,7 @@ function render(force){
 }
 function renderSaveState(){
   const dot = $("saveDot"), txt = $("saveText");
-  if(mode === "device"){ const busy = pending > 0 || idbQueue.size; dot.className = busy ? "dot busy" : "dot"; txt.textContent = busy ? "Saving…" : "Saved on this phone"; }
+  if(mode === "device"){ const busy = pending > 0 || idbQueue.size; dot.className = busy ? "dot busy" : "dot"; txt.textContent = busy ? "Saving…" : "Saved on this device"; }
   else if(mode === "local"){ dot.className = "dot off"; txt.textContent = "Not saving online"; }
   else if(mode === "connecting"){ dot.className = "dot busy"; txt.textContent = "Connecting…"; }
   else if(pending > 0){ dot.className = "dot busy"; txt.textContent = "Saving…"; }
@@ -2325,8 +2325,24 @@ async function pasteAndActivate(){ try{ const t = await navigator.clipboard.read
   $("gateErr").textContent = "Couldn't read the clipboard. Press and hold in the box, then tap Paste."; $("gateIn").focus(); }
 /* iPhone: an app on the Home Screen keeps its own storage, separate from Safari, so it asks for the code once more.
    After activating in Safari, offer to copy the code and explain the last step. */
+function iosBrowserName(){ const u = navigator.userAgent;
+  if(/EdgiOS/.test(u)) return "Edge"; if(/CriOS/.test(u)) return "Chrome"; if(/FxiOS/.test(u)) return "Firefox"; if(/OPiOS|OPT\//.test(u)) return "Opera"; if(/DuckDuckGo/.test(u)) return "DuckDuckGo";
+  if(/GSA\//.test(u)) return "the Google app"; if(/FBAN|FBAV|Instagram|Line\/|MicroMessenger/.test(u)) return "that app";
+  if(!/Safari\//.test(u)) return "your email app"; /* in-app viewers (Outlook, Gmail…) don't say Safari */
+  return ""; }
 function showInstallHelp(r){
   let g = document.createElement("div"); g.id = "gate"; g.className = "gate"; document.body.appendChild(g);
+  const other = iosBrowserName();
+  if(other){ const link = location.origin + location.pathname + "#activate=" + r.code;
+    g.innerHTML = `<div class="gate-card"><div class="gate-logo" aria-hidden="true">HL</div><h1>Activated for ${esc(r.n)}</h1>
+      <p><strong>One more step: open it in Safari.</strong> This opened in ${esc(other)}, and on iPhone the app has to be added to the Home Screen from Safari.</p>
+      <a class="btn primary" id="gateSafari" href="${esc("x-safari-" + link)}" style="width:100%;justify-content:center;min-height:44px;margin-bottom:8px">Open in Safari</a>
+      <button class="btn" type="button" id="gateCopyLink" style="width:100%;justify-content:center;min-height:44px">Copy link</button>
+      <div class="gate-err" id="gateErr" role="status" style="color:var(--ok);margin-top:8px"></div>
+      <p class="small muted">If "Open in Safari" does nothing: tap <strong>Copy link</strong>, open <strong>Safari</strong>, tap the address bar, paste and go. Then follow the steps there.</p>
+      <button class="linkbtn small" type="button" id="gateSkip">Continue here instead</button></div>`;
+    $("gateCopyLink").onclick = async () => { try{ await navigator.clipboard.writeText(link); $("gateErr").textContent = "Link copied. Now open Safari and paste it in the address bar."; }catch(e){ $("gateErr").textContent = "Couldn't copy. Go back to the email, press and hold the link, and choose Copy."; } };
+    $("gateSkip").onclick = () => g.remove(); return; }
   g.innerHTML = `<div class="gate-card"><div class="gate-logo" aria-hidden="true">HL</div><h1>Activated for ${esc(r.n)}</h1>
     <p><strong>Last step: put it on your Home Screen.</strong></p>
     <ol class="gate-steps"><li>Tap <strong>Copy code</strong> below.</li><li>Tap the <strong>Share</strong> button in Safari (square with an arrow), then <strong>Add to Home Screen</strong>.</li><li>Open Handover Log from your Home Screen and tap <strong>Paste code</strong>. It only asks this once.</li></ol>
@@ -2341,14 +2357,14 @@ function showGate(kind, msg){
   let g = $("gate"); if(!g){ g = document.createElement("div"); g.id = "gate"; g.className = "gate"; document.body.appendChild(g); }
   const expired = kind === "expired";
   g.innerHTML = `<div class="gate-card"><div class="gate-logo" aria-hidden="true">HL</div><h1>Handover Log</h1>
-    ${expired ? `<p><strong>Your access ended on ${esc(fmtDate(lic.e))}.</strong> Your handovers are still safe on this phone. Make a backup now, then enter a new code to keep working.</p>
+    ${expired ? `<p><strong>Your access ended on ${esc(fmtDate(lic.e))}.</strong> Your handovers are still safe on this device. Make a backup now, then enter a new code to keep working.</p>
       <p><button class="btn" type="button" id="gateBackup">Download backup</button></p>`
-      : `<p>Enter the activation code you were sent, or open the activation link on this phone.</p>`}
+      : `<p>Enter the activation code you were sent, or open the activation link on this device.</p>`}
     <label class="lbl" for="gateIn">Activation code</label><textarea id="gateIn" rows="3" placeholder="Paste the code or the link here" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea>
     <div class="gate-err" id="gateErr" role="alert">${esc(msg || "")}</div>
     <button class="btn primary" type="button" id="gateGo">Activate</button>
     ${navigator.clipboard && navigator.clipboard.readText ? `<button class="btn" type="button" id="gatePaste" style="width:100%;justify-content:center;margin-top:8px;min-height:44px">Paste code</button>` : ""}
-    <p class="small muted" style="margin-top:14px">Everything you write stays on this phone. Nothing is sent anywhere.</p></div>`;
+    <p class="small muted" style="margin-top:14px">Everything you write stays on this device. Nothing is sent anywhere.</p></div>`;
   const ps = $("gatePaste"); if(ps) ps.onclick = pasteAndActivate;
   $("gateGo").onclick = async () => { const v = $("gateIn").value; const r = await checkCode(v);
     if(!r){ $("gateErr").textContent = "That code isn't valid. Check you copied all of it."; return; }
@@ -2379,7 +2395,7 @@ function backupNudgeHTML(where){
   const hasData = Object.keys(S.entries).length || Object.keys(S.archive).length || Object.keys(S.standing).length;
   if(!hasData) return ""; const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
   if(where === "signoff" ? (days === null || days >= 1) : (days === null || days >= 14))
-    return `<div class="banner warn"><span><strong>${days === null ? "No backup yet." : `Last backup ${days} day${days === 1 ? "" : "s"} ago.`}</strong> Your handovers are only on this phone. ${where === "signoff" ? "Make a backup before you hand over." : "A backup file lets you get them back if the phone is lost or replaced."}</span><span class="spacer"></span><button class="btn sm" type="button" id="btnBackupNudge">Download backup</button></div>`;
+    return `<div class="banner warn"><span><strong>${days === null ? "No backup yet." : `Last backup ${days} day${days === 1 ? "" : "s"} ago.`}</strong> Your handovers are only on this device. ${where === "signoff" ? "Make a backup before you hand over." : "A backup file lets you get them back if the device is lost or replaced."}</span><span class="spacer"></span><button class="btn sm" type="button" id="btnBackupNudge">Download backup</button></div>`;
   return ""; }
 function registerSW(){
   if(!("serviceWorker" in navigator)) return;
